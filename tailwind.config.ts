@@ -8,8 +8,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        navy: '#1a2744',
-        'navy-light': '#243260',
+        imperial: {
+          DEFAULT: '#003e74',
+          dark:    '#002d56',
+          mid:     '#0054a0',
+          soft:    'rgba(0,62,116,0.08)',
+        },
+      },
+      fontFamily: {
+        sans:  ['"Arial Narrow"', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        serif: ['Georgia', '"Times New Roman"', 'serif'],
+        mono:  ['Consolas', '"Courier New"', 'monospace'],
       },
     },
   },

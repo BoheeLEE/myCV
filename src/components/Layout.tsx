@@ -1,14 +1,13 @@
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { ReactNode } from 'react'
 import site from '../content/site'
 
-type Props = {
-  children: ReactNode
-  title?: string
-}
+type Props = { children: ReactNode; title?: string }
 
 export default function Layout({ children, title }: Props) {
+  const { pathname } = useRouter()
   const pageTitle = title ? `${title} | ${site.title}` : site.title
 
   return (
@@ -18,25 +17,43 @@ export default function Layout({ children, title }: Props) {
         <meta name="description" content={site.description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <div className="min-h-screen flex flex-col">
-        <header className="bg-navy text-white shadow-md">
-          <nav className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link href="/" className="text-xl font-bold tracking-tight hover:text-blue-200 transition-colors">
-              {site.title}
+
+      <div className="page-shell">
+        {/* Brand bar */}
+        <div className="brand-bar">
+          <div className="brand-bar-inner">
+            <span className="brand-bar-text">Imperial College London</span>
+            <span className="brand-bar-sub">National Heart &amp; Lung Institute</span>
+          </div>
+        </div>
+
+        {/* Sticky nav */}
+        <header className="site-header">
+          <Link href="/" className="brand-lockup">
+            <span className="brand-owner">Bohee Lee</span>
+            <span className="brand-sep">/</span>
+            <span className="brand-repo">cv</span>
+          </Link>
+          <nav className="site-nav">
+            <Link href="/" className={`nav-tab${pathname === '/' ? ' is-active' : ''}`}>
+              Overview
             </Link>
-            <div className="flex gap-6 text-sm font-medium">
-              <Link href="/" className="hover:text-blue-200 transition-colors">Home</Link>
-              <Link href="/cv" className="hover:text-blue-200 transition-colors">CV</Link>
-            </div>
+            <Link href="/cv" className={`nav-tab${pathname === '/cv' ? ' is-active' : ''}`}>
+              Full CV
+            </Link>
           </nav>
         </header>
 
-        <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-10">
-          {children}
-        </main>
+        {children}
 
-        <footer className="bg-gray-50 border-t text-center text-sm text-gray-500 py-6">
-          <p>{site.title} &mdash; {site.description}</p>
+        {/* Footer */}
+        <footer className="site-footer">
+          <div className="site-footer-inner">
+            <span className="footer-name">{site.title}</span>
+            <span className="footer-meta">
+              Postdoctoral Researcher · Imperial College London
+            </span>
+          </div>
         </footer>
       </div>
     </>

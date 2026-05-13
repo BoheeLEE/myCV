@@ -1,145 +1,239 @@
 import Layout from '../components/Layout'
 import cv from '../content/cvGenerated'
 import site from '../content/site'
-import Link from 'next/link'
 
-const SELECTED_PUBS_COUNT = 6
+function extractYear(citation: string): string {
+  const m = citation.match(/\b(20\d{2})\b/)
+  return m ? m[1] : ''
+}
+
+function isEditorial(citation: string): boolean {
+  return /^\(editorial\)/i.test(citation.trim())
+}
 
 export default function Home() {
-  const selectedPubs = cv.publications.slice(0, SELECTED_PUBS_COUNT)
-  const worksInProgress = cv.manuscriptsUnderReview
+  const selectedPubs = cv.publications.slice(0, 7)
+  const wip = cv.manuscriptsUnderReview
+
+  const eduParsed = cv.education.map((e) => {
+    const parts = e.degree.split(',')
+    return {
+      title: parts[0]?.trim() ?? e.degree,
+      institution: parts.slice(1).join(',').trim(),
+    }
+  })
 
   return (
     <Layout>
-      {/* Hero */}
-      <section className="mb-10 border-b pb-8">
-        <h1 className="text-3xl font-bold text-navy mb-1">{cv.name}</h1>
-        <p className="text-gray-500 text-sm mb-3">{cv.credentials}</p>
-        <p className="text-lg font-medium text-gray-700">
-          {cv.currentPosition.title}
-          {cv.currentPosition.institution && (
-            <span className="text-gray-500 font-normal">
-              {' '}&#8212; {cv.currentPosition.institution}
-            </span>
-          )}
-        </p>
-        {cv.currentPosition.period && (
-          <p className="text-sm text-gray-500 mt-0.5">{cv.currentPosition.period}</p>
-        )}
+      {/* ── Hero ──────────────────────────────────────────────────── */}
+      <section className="hero">
+        <div className="hero-copy">
+          <p className="eyebrow">Academic Profile</p>
+          <h1 className="hero-name">{cv.name}</h1>
+          <p className="hero-credentials">{cv.credentials}</p>
+          <p className="hero-role">
+            <strong style={{ color: 'var(--ink)' }}>{cv.currentPosition.title}</strong>
+            {cv.currentPosition.institution && (
+              <> &mdash; {cv.currentPosition.institution}</>
+            )}
+            {cv.currentPosition.period && (
+              <><br /><span style={{ fontSize: '0.88rem' }}>{cv.currentPosition.period}</span></>
+            )}
+          </p>
 
-        <div className="flex flex-wrap gap-4 mt-4 text-sm">
-          {cv.contact.email && (
-            <a href={`mailto:${cv.contact.email}`} className="text-blue-700 hover:underline">
-              {cv.contact.email}
+          {cv.summary && (
+            <p style={{ marginTop: '1.2rem', color: 'var(--muted)', lineHeight: 1.75, fontSize: '0.96rem', maxWidth: '52rem' }}>
+              {cv.summary}
+            </p>
+          )}
+
+          <div className="hero-actions">
+            <a href={site.cvUrl} download={site.cvDownloadName} className="btn btn-primary">
+              Download CV
             </a>
-          )}
-          {cv.contact.website && (
-            <a href={cv.contact.website} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
-              Imperial Profile
+            <a href={site.cvUrl} target="_blank" rel="noopener noreferrer" className="btn">
+              View PDF
             </a>
-          )}
-          {cv.contact.scholar && (
-            <a href={cv.contact.scholar} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
-              Google Scholar
-            </a>
-          )}
-          {cv.contact.hindex && (
-            <span className="text-gray-600">H-index: <strong>{cv.contact.hindex}</strong></span>
-          )}
-          <Link href="/cv" className="text-blue-700 hover:underline">
-            View Full CV &rarr;
-          </Link>
+            {cv.contact.scholar && (
+              <a href={cv.contact.scholar} target="_blank" rel="noopener noreferrer" className="btn">
+                Google Scholar
+              </a>
+            )}
+          </div>
+
+          <ul className="hero-stats">
+            <li className="stat-tile">
+              <span className="stat-value">31</span>
+              <span className="stat-label">Publications</span>
+            </li>
+            <li className="stat-tile">
+              <span className="stat-value">17</span>
+              <span className="stat-label">First Author</span>
+            </li>
+            <li className="stat-tile">
+              <span className="stat-value">{cv.contact.hindex ?? '13'}</span>
+              <span className="stat-label">H-index</span>
+            </li>
+            <li className="stat-tile">
+              <span className="stat-value">4</span>
+              <span className="stat-label">Grants Won</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Right panel: contact */}
+        <div className="hero-panel">
+          <p className="panel-kicker">Contact &amp; Links</p>
+          <p className="panel-title">{cv.currentPosition.institution}</p>
+          <ul className="contact-list">
+            {cv.contact.email && (
+              <li>
+                <span className="contact-label">Email</span>
+                <a href={`mailto:${cv.contact.email}`} className="contact-value">
+                  {cv.contact.email}
+                </a>
+              </li>
+            )}
+            {cv.contact.website && (
+              <li>
+                <span className="contact-label">Imperial Profile</span>
+                <a href={cv.contact.website} target="_blank" rel="noopener noreferrer" className="contact-value">
+                  imperial.ac.uk/people/bohee.lee
+                </a>
+              </li>
+            )}
+            {cv.contact.scholar && (
+              <li>
+                <span className="contact-label">Google Scholar</span>
+                <a href={cv.contact.scholar} target="_blank" rel="noopener noreferrer" className="contact-value">
+                  View publications
+                </a>
+              </li>
+            )}
+          </ul>
         </div>
       </section>
 
-      {/* Summary */}
-      {cv.summary && (
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-navy mb-3">About</h2>
-          <p className="text-gray-700 leading-relaxed">{cv.summary}</p>
-        </section>
-      )}
+      {/* ── Main 2-col ─────────────────────────────────────────────── */}
+      <div className="main-grid">
 
-      {/* Research Areas */}
-      {cv.skills.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-navy mb-3">Research Methods &amp; Skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {cv.skills.map((skill) => (
-              <span
-                key={skill}
-                className="bg-blue-50 text-blue-800 text-sm px-3 py-1 rounded-full border border-blue-100"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </section>
-      )}
+        {/* ── Sidebar ──────────────────────────────────────────────── */}
+        <aside className="profile-rail">
 
-      {/* Selected Publications */}
-      {selectedPubs.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-navy mb-3">
-            Selected Publications
-            {cv.contact.scholar && (
-              <a
-                href={cv.contact.scholar}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-3 text-sm font-normal text-blue-700 hover:underline"
-              >
-                View all on Google Scholar &rarr;
-              </a>
-            )}
-          </h2>
-          <ol className="space-y-3 list-none">
-            {selectedPubs.map((pub, i) => (
-              <li key={i} className="text-sm text-gray-700 leading-relaxed pl-4 border-l-2 border-blue-200">
-                {pub}
-              </li>
-            ))}
-          </ol>
-          {cv.publications.length > SELECTED_PUBS_COUNT && (
-            <p className="mt-3 text-sm text-gray-500">
-              +{cv.publications.length - SELECTED_PUBS_COUNT} more publications.{' '}
-              <a
-                href={cv.contact.scholar ?? '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-700 hover:underline"
-              >
-                Full list on Google Scholar
-              </a>
-            </p>
+          {/* Research methods */}
+          {cv.skills.length > 0 && (
+            <div className="card">
+              <span className="section-label">Methods &amp; Skills</span>
+              <div className="chip-row">
+                {cv.skills.map((s) => (
+                  <span key={s} className="chip">{s}</span>
+                ))}
+              </div>
+            </div>
           )}
-        </section>
-      )}
 
-      {/* Work in Progress */}
-      {worksInProgress.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold text-navy mb-3">Work in Progress</h2>
-          <ul className="space-y-3">
-            {worksInProgress.map((ms, i) => (
-              <li key={i} className="text-sm text-gray-700 leading-relaxed pl-4 border-l-2 border-amber-300">
-                {ms}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {/* Education */}
+          <div className="card">
+            <span className="section-label">Education</span>
+            <ul className="timeline-list">
+              {eduParsed.map((e, i) => (
+                <li key={i}>
+                  <span className="timeline-title">{e.title}</span>
+                  <span className="timeline-detail">{e.institution}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-      {/* Download CV */}
-      <section>
-        <a
-          href={site.cvUrl}
-          download={site.cvDownloadName}
-          className="inline-flex items-center gap-2 bg-navy text-white px-5 py-2.5 rounded-md hover:bg-navy-light transition-colors text-sm font-medium"
-        >
-          Download Full CV (PDF)
-        </a>
-      </section>
+          {/* Funding highlights */}
+          {cv.fundingAwards.length > 0 && (
+            <div className="card">
+              <span className="section-label">Selected Grants</span>
+              <ul className="timeline-list">
+                {cv.fundingAwards.slice(0, 4).map((f, i) => (
+                  <li key={i}>
+                    <span className="timeline-detail">{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </aside>
+
+        {/* ── Main content ──────────────────────────────────────────── */}
+        <main style={{ display: 'grid', gap: '1.4rem' }}>
+
+          {/* Selected Publications */}
+          {selectedPubs.length > 0 && (
+            <section className="content-section">
+              <h2>Selected Publications</h2>
+              <p className="section-note">
+                {cv.publications.length} peer-reviewed articles · 17 as first author.
+                {cv.contact.scholar && (
+                  <> <a href={cv.contact.scholar} target="_blank" rel="noopener noreferrer" className="link-chip" style={{ display: 'inline-flex', marginLeft: '0.4rem' }}>
+                    Full list on Scholar
+                  </a></>
+                )}
+              </p>
+              <ul className="pub-list">
+                {selectedPubs.map((pub, i) => {
+                  const year = extractYear(pub)
+                  const editorial = isEditorial(pub)
+                  const text = pub.replace(/^\(editorial\)\s*/i, '')
+                  return (
+                    <li key={i} className="pub-item">
+                      <div className="pub-meta">
+                        {year && <span className="pub-year">{year}</span>}
+                        {editorial && <span className="pub-type">Editorial</span>}
+                      </div>
+                      <p className="pub-citation">{text}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+              {cv.publications.length > 7 && (
+                <div className="link-row" style={{ marginTop: '1rem' }}>
+                  <a href={cv.contact.scholar ?? '#'} target="_blank" rel="noopener noreferrer" className="link-chip">
+                    +{cv.publications.length - 7} more on Google Scholar
+                  </a>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Work in Progress */}
+          {wip.length > 0 && (
+            <section className="content-section">
+              <h2>Work in Progress</h2>
+              <p className="section-note">Manuscripts currently under review.</p>
+              <ul className="pub-list">
+                {wip.map((ms, i) => (
+                  <li key={i} className="pub-item wip-item">
+                    <div className="pub-meta">
+                      <span className="pub-type">Under Review</span>
+                    </div>
+                    <p className="pub-citation">{ms}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Teaching */}
+          {cv.teaching.length > 0 && (
+            <section className="content-section">
+              <h2>Teaching &amp; Supervision</h2>
+              <ul className="timeline-list">
+                {cv.teaching.map((t, i) => (
+                  <li key={i}>
+                    <span className="timeline-detail">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </main>
+      </div>
     </Layout>
   )
 }
