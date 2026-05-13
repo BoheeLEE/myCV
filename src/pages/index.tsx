@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Layout from '../components/Layout'
 import cv from '../content/cvGenerated'
 import site from '../content/site'
@@ -83,8 +84,30 @@ export default function Home() {
 
         {/* Right panel: contact */}
         <div className="hero-panel">
-          <p className="panel-kicker">Contact &amp; Links</p>
-          <p className="panel-title">{cv.currentPosition.institution}</p>
+          {/* Portrait */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+            <div style={{
+              width: 220,
+              height: 220,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '3px solid rgba(255,255,255,0.35)',
+              boxShadow: '0 8px 28px rgba(0,0,0,0.25)',
+              flexShrink: 0,
+            }}>
+              <Image
+                src="/portrait.jpg"
+                alt="Bohee Lee"
+                width={220}
+                height={220}
+                style={{ objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+                priority
+              />
+            </div>
+          </div>
+
+          <p className="panel-kicker" style={{ textAlign: 'center' }}>Contact &amp; Links</p>
+          <p className="panel-title" style={{ textAlign: 'center', fontSize: '1.15rem' }}>{cv.currentPosition.institution}</p>
           <ul className="contact-list">
             {cv.contact.email && (
               <li>
