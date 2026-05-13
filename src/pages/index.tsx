@@ -96,7 +96,7 @@ export default function Home() {
               flexShrink: 0,
             }}>
               <Image
-                src="/portrait.jpg"
+                src="/myCV/portrait.jpg"
                 alt="Bohee Lee"
                 width={220}
                 height={220}
